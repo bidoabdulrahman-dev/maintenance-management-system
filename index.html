@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -5,14 +6,18 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>نظام إدارة الصيانة</title>
 <style>
+*{box-sizing:border-box}
 body{font-family:Arial;background:#f1f3f5;margin:0;color:#263238}
-header{background:#263238;color:white;padding:22px;text-align:center}
-main{max-width:500px;margin:30px auto;padding:15px}
-.card{background:white;padding:22px;margin:15px 0;border-radius:12px}
-input,button{width:100%;padding:13px;margin:9px 0;box-sizing:border-box;border-radius:7px}
-input{border:1px solid #ccc}
-button{background:#37474f;color:white;border:0;font-size:16px}
-#message{white-space:pre-wrap}
+header{background:#263238;color:white;padding:20px}
+main{max-width:850px;margin:20px auto;padding:12px}
+.card{background:white;padding:20px;margin:15px 0;border-radius:12px}
+input,select,textarea,button{width:100%;padding:12px;margin:8px 0;border-radius:7px;font-size:15px}
+input,select,textarea{border:1px solid #ccc}
+button{background:#37474f;color:white;border:0;cursor:pointer}
+.secondary{background:#607d8b}
+.ticket{border:1px solid #ddd;border-radius:8px;padding:12px;margin:12px 0}
+.hidden{display:none}
+small{color:#607d8b}
 </style>
 </head>
 <body>
@@ -21,13 +26,46 @@ button{background:#37474f;color:white;border:0;font-size:16px}
 <p>Maintenance Management System</p>
 </header>
 <main>
-<div class="card">
-<h3>تسجيل الدخول</h3>
+<div class="card" id="login">
+<h3>تسجيل دخول الإدارة</h3>
 <input id="email" type="email" placeholder="البريد الإلكتروني">
 <input id="password" type="password" placeholder="كلمة المرور">
-<button id="login">دخول</button>
-<button id="logout" hidden>تسجيل الخروج</button>
-<p id="message">جاهز لتسجيل الدخول</p>
+<button id="loginBtn">دخول</button>
+<p id="loginMsg"></p>
+</div>
+
+<div id="dashboard" class="hidden">
+<div class="card">
+<h3>لوحة تحكم الإدارة</h3>
+<p id="welcome"></p>
+<button class="secondary" id="logoutBtn">تسجيل الخروج</button>
+</div>
+
+<div class="card">
+<h3>إنشاء بلاغ صيانة جديد</h3>
+<input id="branch" placeholder="اسم الفرع">
+<select id="type">
+<option value="كهرباء">كهرباء</option>
+<option value="سباكة">سباكة</option>
+<option value="تكييف">تكييف</option>
+<option value="أعمال مدنية">أعمال مدنية</option>
+<option value="أخرى">أخرى</option>
+</select>
+<select id="priority">
+<option value="عادية">عادية</option>
+<option value="متوسطة">متوسطة</option>
+<option value="عاجلة">عاجلة</option>
+</select>
+<textarea id="description" rows="4" placeholder="اكتب وصف العطل بالتفصيل"></textarea>
+<button id="saveBtn">حفظ البلاغ</button>
+<p id="saveMsg"></p>
+</div>
+
+<div class="card">
+<h3>البلاغات المسجلة</h3>
+<button class="secondary" id="refreshBtn">تحديث البلاغات</button>
+<div id="requests">جاري تحميل البلاغات...</div>
+</div>
 </div>
 </main>
 
@@ -35,43 +73,112 @@ button{background:#37474f;color:white;border:0;font-size:16px}
 import { createClient } from
 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
-const SUPABASE_URL = 'https://jakozzeeomgfphezticw.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_CbNZXmPEeN8Dzl7AC1RAbw_fB0Wty6e';
+const supabase = createClient(
+'https://jakozzeeomgfphezticw.supabase.co',
+'ضع_مفتاح_PUBLISHABLE_هنا'
+);
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+const $ = id => document.getElementById(id);
+let currentUser = null;
 
-const message = document.getElementById('message');
+function showDashboard(user){
+ currentUser=user;
+ $('login').classList.add('hidden');
+ $('dashboard').classList.remove('hidden');
+ $('welcome').textContent='مرحباً '+user.email;
+ loadRequests();
+}
 
-document.getElementById('login').onclick = async () => {
-  const email = document.getElementById('email').value.trim();
-  const password = document.getElementById('password').value;
+async function checkSession(){
+ const {data}=await supabase.auth.getSession();
+ if(data.session) showDashboard(data.session.user);
+}
 
-  if (!email || !password) {
-    message.textContent = 'اكتب البريد الإلكتروني وكلمة المرور';
-    return;
-  }
-
-  message.textContent = 'جاري تسجيل الدخول...';
-
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password
-  });
-
-  if (error) {
-    message.textContent = 'تعذر تسجيل الدخول: ' + error.message;
-    return;
-  }
-
-  message.textContent = 'تم تسجيل الدخول بنجاح: ' + data.user.email;
-  document.getElementById('logout').hidden = false;
+$('loginBtn').onclick=async()=>{
+ $('loginMsg').textContent='جاري تسجيل الدخول...';
+ const {data,error}=await supabase.auth.signInWithPassword({
+  email:$('email').value.trim(),
+  password:$('password').value
+ });
+ if(error){$('loginMsg').textContent='خطأ: '+error.message;return;}
+ showDashboard(data.user);
 };
 
-document.getElementById('logout').onclick = async () => {
-  await supabase.auth.signOut();
-  message.textContent = 'تم تسجيل الخروج';
-  document.getElementById('logout').hidden = true;
+$('logoutBtn').onclick=async()=>{
+ await supabase.auth.signOut();
+ currentUser=null;
+ $('dashboard').classList.add('hidden');
+ $('login').classList.remove('hidden');
+ $('password').value='';
 };
+
+$('saveBtn').onclick=async()=>{
+ if(!currentUser)return;
+ const branch=$('branch').value.trim();
+ const description=$('description').value.trim();
+ if(!branch||!description){
+  $('saveMsg').textContent='اكتب اسم الفرع ووصف العطل';
+  return;
+ }
+ $('saveBtn').disabled=true;
+ $('saveMsg').textContent='جاري حفظ البلاغ...';
+
+ const {error}=await supabase
+ .from('maintenance_requests')
+ .insert({
+  branch_name:branch,
+  problem_type:$('type').value,
+  priority:$('priority').value,
+  description:description,
+  reported_by:currentUser.id,
+  status:'جديد'
+ });
+
+ $('saveBtn').disabled=false;
+ if(error){
+  $('saveMsg').textContent='تعذر الحفظ: '+error.message;
+  return;
+ }
+ $('saveMsg').textContent='تم حفظ البلاغ بنجاح';
+ $('branch').value='';
+ $('description').value='';
+ await loadRequests();
+};
+
+async function loadRequests(){
+ $('requests').textContent='جاري تحميل البلاغات...';
+ const {data,error}=await supabase
+  .from('maintenance_requests')
+  .select('id,branch_name,problem_type,priority,description,status,created_at')
+  .order('created_at',{ascending:false});
+
+ if(error){
+  $('requests').textContent='تعذر تحميل البلاغات: '+error.message;
+  return;
+ }
+ if(!data.length){
+  $('requests').textContent='لا توجد بلاغات حتى الآن';
+  return;
+ }
+ $('requests').replaceChildren();
+ data.forEach(item=>{
+  const box=document.createElement('div');
+  box.className='ticket';
+  const title=document.createElement('strong');
+  title.textContent=item.branch_name||'فرع غير محدد';
+  const details=document.createElement('p');
+  details.textContent=(item.problem_type||'')+' | '+(item.priority||'');
+  const desc=document.createElement('p');
+  desc.textContent=item.description||'';
+  const status=document.createElement('small');
+  status.textContent='الحالة: '+(item.status||'جديد');
+  box.append(title,details,desc,status);
+  $('requests').append(box);
+ });
+}
+
+$('refreshBtn').onclick=loadRequests;
+checkSession();
 </script>
 </body>
 </html>

@@ -29,6 +29,8 @@ small{color:#607d8b}
 .notice{background:#fff3cd;padding:12px;border-radius:8px;margin-top:12px}
 .status{padding:6px 10px;border-radius:6px;display:inline-block;margin:5px 0;background:#eee}
 .actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.success{background:#e8f5e9;padding:12px;border-radius:8px}
+.error{background:#ffebee;padding:12px;border-radius:8px}
 </style>
 </head>
 <body>
@@ -139,9 +141,38 @@ small{color:#607d8b}
 
 <div class="card hidden" id="technicianInfo">
 <h3>حساب الفني</h3>
-<p>تم تسجيل الدخول بنجاح.</p>
-<p class="notice">حسابك في انتظار موافقة الإدارة. ستتاح لك متابعة البلاغات بعد اعتماد حسابك.</p>
+<p id="technicianName"></p>
+<p id="technicianStatus"></p>
+<div id="waitingNotice" class="notice">
+حسابك في انتظار موافقة الإدارة.
+</div>
 <button id="techLogout">تسجيل الخروج</button>
+</div>
+
+<div class="hidden" id="technicianDashboard">
+
+<div class="card">
+<h3>لوحة الفني</h3>
+<p id="techWelcome"></p>
+<p id="techSpecialty"></p>
+<button id="techLogout2">تسجيل الخروج</button>
+</div>
+
+<div class="card">
+<h3>مشاركة الموقع الجغرافي</h3>
+<p>سيتم تحديث موقعك للإدارة تلقائيًا طالما التطبيق مفتوح وبعد موافقتك على صلاحية الموقع.</p>
+<p id="locationStatus" class="notice">جاري تجهيز خدمة الموقع...</p>
+<p id="lastLocation"></p>
+<button class="secondary" id="retryLocationBtn">إعادة تشغيل مشاركة الموقع</button>
+<button class="stop" id="stopLocationBtn">إيقاف مشاركة الموقع</button>
+</div>
+
+<div class="card">
+<h3>حالة الحساب</h3>
+<p class="success">حسابك معتمد ونشط.</p>
+<p>سيتم إضافة متابعة البلاغات والتقارير الفنية في الخطوة التالية.</p>
+</div>
+
 </div>
 
 </main>
@@ -157,36 +188,109 @@ const supabase = createClient(
 
 const $ = id => document.getElementById(id);
 let currentUser = null;
+let locationWatchId = null;
+let locationRunning = false;
 
 function showOnly(id){
- ['login','signup','dashboard','technicianInfo'].forEach(x=>{
+ [
+  'login',
+  'signup',
+  'dashboard',
+  'technicianInfo',
+  'technicianDashboard'
+ ].forEach(x=>{
   $(x).classList.add('hidden');
  });
  $(id).classList.remove('hidden');
+}
+
+function stopLocation(){
+ if(locationWatchId !== null){
+  navigator.geolocation.clearWatch(locationWatchId);
+ }
+ locationWatchId = null;
+ locationRunning = false;
 }
 
 $('showSignup').onclick=()=>showOnly('signup');
 $('showLogin').onclick=()=>showOnly('login');
 
 async function enterApp(user){
+ stopLocation();
  currentUser=user;
 
- const {data,error}=await supabase.rpc('current_user_is_admin');
+ const {data:admin,error:adminError}=await supabase.rpc(
+  'current_user_is_admin'
+ );
 
- if(error){
+ if(adminError){
   showOnly('login');
-  $('loginMsg').textContent='تعذر التحقق من صلاحية الحساب: '+error.message;
+  $('loginMsg').textContent=
+   'تعذر التحقق من صلاحية الحساب: '+adminError.message;
   return;
  }
 
- if(data===true){
+ if(admin===true){
   showOnly('dashboard');
   $('welcome').textContent='مرحباً '+user.email;
   await loadTechnicians();
   await loadRequests();
- }else{
-  showOnly('technicianInfo');
+  return;
  }
+
+ const {data:tech,error}=await supabase
+  .from('technicians')
+  .select('full_name,phone,specialization,is_active,approval_status')
+  .eq('auth_user_id',user.id)
+  .maybeSingle();
+
+ if(error){
+  showOnly('login');
+  $('loginMsg').textContent=
+   'تعذر قراءة بيانات الفني: '+error.message;
+  return;
+ }
+
+ if(!tech){
+  showOnly('technicianInfo');
+  $('technicianName').textContent='لم يتم العثور على بيانات الفني.';
+  $('technicianStatus').textContent='';
+  $('waitingNotice').textContent=
+   'يرجى التواصل مع الإدارة لمراجعة حسابك.';
+  return;
+ }
+
+ $('technicianName').textContent='أهلاً '+(tech.full_name||'');
+ $('technicianStatus').textContent=
+  'التخصصات: '+(tech.specialization||'غير محددة');
+
+ if(tech.approval_status==='rejected'){
+  showOnly('technicianInfo');
+  $('waitingNotice').textContent=
+   'تم رفض طلب التسجيل. يرجى التواصل مع الإدارة.';
+  return;
+ }
+
+ if(tech.approval_status!=='approved'){
+  showOnly('technicianInfo');
+  $('waitingNotice').textContent=
+   'حسابك في انتظار موافقة الإدارة.';
+  return;
+ }
+
+ if(tech.is_active!==true){
+  showOnly('technicianInfo');
+  $('waitingNotice').textContent=
+   'حسابك معتمد لكنه موقوف حاليًا من الإدارة.';
+  return;
+ }
+
+ showOnly('technicianDashboard');
+ $('techWelcome').textContent='مرحباً '+(tech.full_name||'فني');
+ $('techSpecialty').textContent=
+  'التخصصات: '+(tech.specialization||'غير محددة');
+
+ startLocation();
 }
 
 $('signupBtn').onclick=async()=>{
@@ -238,19 +342,23 @@ $('signupBtn').onclick=async()=>{
 
  if(data.session){
   $('signupMsg').textContent='تم إنشاء الحساب. حسابك في انتظار موافقة الإدارة.';
-  showOnly('technicianInfo');
+  await enterApp(data.user);
  }else{
-  $('signupMsg').textContent='تم إرسال طلب التسجيل. راجع بريدك الإلكتروني لتأكيد الحساب، وبعدها انتظر موافقة الإدارة.';
+  $('signupMsg').textContent=
+   'تم إرسال طلب التسجيل. راجع بريدك الإلكتروني لتأكيد الحساب، وبعدها انتظر موافقة الإدارة.';
  }
 };
 
 $('loginBtn').onclick=async()=>{
  $('loginMsg').textContent='جاري تسجيل الدخول...';
+ $('loginBtn').disabled=true;
 
  const {data,error}=await supabase.auth.signInWithPassword({
   email:$('email').value.trim(),
   password:$('password').value
  });
+
+ $('loginBtn').disabled=false;
 
  if(error){
   $('loginMsg').textContent='تعذر الدخول: '+error.message;
@@ -262,14 +370,102 @@ $('loginBtn').onclick=async()=>{
 
 $('logoutBtn').onclick=logout;
 $('techLogout').onclick=logout;
+$('techLogout2').onclick=logout;
 
 async function logout(){
+ stopLocation();
  await supabase.auth.signOut();
  currentUser=null;
  showOnly('login');
  $('password').value='';
  $('loginMsg').textContent='تم تسجيل الخروج';
 }
+
+function startLocation(){
+ if(!currentUser || locationRunning)return;
+
+ if(!navigator.geolocation){
+  $('locationStatus').textContent=
+   'المتصفح لا يدعم تحديد الموقع الجغرافي.';
+  return;
+ }
+
+ $('locationStatus').textContent=
+  'في انتظار السماح باستخدام موقعك...';
+
+ locationRunning=true;
+
+ locationWatchId=navigator.geolocation.watchPosition(
+  async position=>{
+   if(!currentUser)return;
+
+   const lat=position.coords.latitude;
+   const lon=position.coords.longitude;
+
+   $('locationStatus').textContent=
+    'تم تحديد موقعك، جاري إرساله للإدارة...';
+
+   const {error}=await supabase
+    .from('technician_locations')
+    .upsert({
+     auth_user_id:currentUser.id,
+     latitude:lat,
+     longitude:lon,
+     updated_at:new Date().toISOString()
+    },{
+     onConflict:'auth_user_id'
+    });
+
+   if(error){
+    $('locationStatus').textContent=
+     'تعذر إرسال الموقع: '+error.message;
+    return;
+   }
+
+   $('locationStatus').textContent=
+    'موقعك يتم تحديثه بنجاح.';
+   $('locationStatus').className='success';
+
+   $('lastLocation').textContent=
+    'آخر تحديث: '+new Date().toLocaleTimeString('ar-EG')+
+    ' | الدقة التقريبية: '+
+    Math.round(position.coords.accuracy)+' متر';
+  },
+
+  error=>{
+   locationRunning=false;
+   locationWatchId=null;
+
+   const messages={
+    1:'لم تسمح للتطبيق باستخدام موقعك. فعّل إذن الموقع من إعدادات الهاتف.',
+    2:'تعذر تحديد الموقع. تأكد من تشغيل GPS.',
+    3:'انتهت مهلة تحديد الموقع. حاول مرة أخرى.'
+   };
+
+   $('locationStatus').textContent=
+    messages[error.code]||'حدث خطأ أثناء تحديد الموقع.';
+   $('locationStatus').className='error';
+  },
+
+  {
+   enableHighAccuracy:true,
+   maximumAge:10000,
+   timeout:20000
+  }
+ );
+}
+
+$('retryLocationBtn').onclick=()=>{
+ stopLocation();
+ $('locationStatus').textContent='جاري إعادة تشغيل الموقع...';
+ startLocation();
+};
+
+$('stopLocationBtn').onclick=()=>{
+ stopLocation();
+ $('locationStatus').textContent=
+  'تم إيقاف مشاركة الموقع.';
+};
 
 async function loadTechnicians(){
  $('techniciansList').textContent='جاري تحميل الفنيين...';
@@ -281,12 +477,14 @@ async function loadTechnicians(){
   .order('created_at',{ascending:false});
 
  if(error){
-  $('techniciansList').textContent='تعذر تحميل الفنيين: '+error.message;
+  $('techniciansList').textContent=
+   'تعذر تحميل الفنيين: '+error.message;
   return;
  }
 
  if(!data || !data.length){
-  $('techniciansList').textContent='لا يوجد فنيون مسجلون حتى الآن.';
+  $('techniciansList').textContent=
+   'لا يوجد فنيون مسجلون حتى الآن.';
   return;
  }
 
@@ -303,7 +501,8 @@ async function loadTechnicians(){
   phone.textContent='الموبايل: '+(tech.phone||'غير مسجل');
 
   const specialty=document.createElement('p');
-  specialty.textContent='التخصصات: '+(tech.specialization||'غير محددة');
+  specialty.textContent=
+   'التخصصات: '+(tech.specialization||'غير محددة');
 
   const status=document.createElement('p');
   status.className='status';
@@ -311,11 +510,13 @@ async function loadTechnicians(){
   if(tech.approval_status==='pending'){
    status.textContent='الحالة: في انتظار الموافقة';
   }else if(tech.approval_status==='approved'){
-   status.textContent=tech.is_active?'الحالة: معتمد ونشط':'الحالة: معتمد لكنه موقوف';
+   status.textContent=tech.is_active?
+    'الحالة: معتمد ونشط':'الحالة: معتمد لكنه موقوف';
   }else if(tech.approval_status==='rejected'){
    status.textContent='الحالة: مرفوض';
   }else{
-   status.textContent='الحالة: '+(tech.approval_status||'غير محددة');
+   status.textContent=
+    'الحالة: '+(tech.approval_status||'غير محددة');
   }
 
   const actions=document.createElement('div');
@@ -332,7 +533,8 @@ async function loadTechnicians(){
   }else{
    const stopBtn=document.createElement('button');
    stopBtn.className='stop';
-   stopBtn.textContent=tech.is_active?'إيقاف الفني':'إعادة تفعيل الفني';
+   stopBtn.textContent=tech.is_active?
+    'إيقاف الفني':'إعادة تفعيل الفني';
    stopBtn.onclick=()=>updateTechnician(
     tech.id,'approved',!tech.is_active
    );
@@ -368,7 +570,8 @@ async function updateTechnician(id,status,active){
   .eq('id',id);
 
  if(error){
-  $('techMsg').textContent='تعذر تحديث الفني: '+error.message;
+  $('techMsg').textContent=
+   'تعذر تحديث الفني: '+error.message;
   return;
  }
 
@@ -425,11 +628,12 @@ async function loadRequests(){
   .order('created_at',{ascending:false});
 
  if(error){
-  $('requests').textContent='تعذر تحميل البلاغات: '+error.message;
+  $('requests').textContent=
+   'تعذر تحميل البلاغات: '+error.message;
   return;
  }
 
- if(!data.length){
+ if(!data || !data.length){
   $('requests').textContent='لا توجد بلاغات حتى الآن';
   return;
  }
@@ -444,7 +648,8 @@ async function loadRequests(){
   title.textContent=item.branch_name||'فرع غير محدد';
 
   const details=document.createElement('p');
-  details.textContent=(item.problem_type||'')+' | '+(item.priority||'');
+  details.textContent=
+   (item.problem_type||'')+' | '+(item.priority||'');
 
   const desc=document.createElement('p');
   desc.textContent=item.description||'';

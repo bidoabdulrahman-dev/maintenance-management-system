@@ -16,6 +16,9 @@ input,select,textarea{border:1px solid #ccc}
 button{background:#37474f;color:white;border:0;cursor:pointer}
 button:disabled{opacity:.5}
 .secondary{background:#607d8b}
+.approve{background:#2e7d32}
+.reject{background:#c62828}
+.stop{background:#ef6c00}
 .ticket{border:1px solid #ddd;border-radius:8px;padding:12px;margin:12px 0}
 .hidden{display:none}
 small{color:#607d8b}
@@ -24,9 +27,12 @@ small{color:#607d8b}
 .specialties input{width:auto;margin-left:6px}
 .switch{text-align:center;color:#1565c0;cursor:pointer;padding:12px}
 .notice{background:#fff3cd;padding:12px;border-radius:8px;margin-top:12px}
+.status{padding:6px 10px;border-radius:6px;display:inline-block;margin:5px 0;background:#eee}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 </style>
 </head>
 <body>
+
 <header>
 <h2>نظام إدارة الصيانة</h2>
 <p>Maintenance Management System</p>
@@ -75,6 +81,7 @@ small{color:#607d8b}
 </div>
 
 <div id="dashboard" class="hidden">
+
 <div class="card">
 <h3>لوحة تحكم الإدارة</h3>
 <p id="welcome"></p>
@@ -82,8 +89,17 @@ small{color:#607d8b}
 </div>
 
 <div class="card">
+<h3>إدارة الفنيين</h3>
+<p>مراجعة طلبات التسجيل واعتماد الفنيين.</p>
+<button class="secondary" id="refreshTechBtn">تحديث قائمة الفنيين</button>
+<div id="techniciansList">جاري تحميل الفنيين...</div>
+<p id="techMsg"></p>
+</div>
+
+<div class="card">
 <h3>إنشاء بلاغ صيانة جديد</h3>
 <input id="branch" placeholder="اسم الفرع">
+
 <select id="type">
 <option value="كهرباء">كهرباء</option>
 <option value="سباكة">سباكة</option>
@@ -101,11 +117,13 @@ small{color:#607d8b}
 <option value="أمن وسلامة">أمن وسلامة</option>
 <option value="أخرى">أخرى</option>
 </select>
+
 <select id="priority">
 <option value="عادية">عادية</option>
 <option value="متوسطة">متوسطة</option>
 <option value="عاجلة">عاجلة</option>
 </select>
+
 <textarea id="description" rows="4" placeholder="وصف العطل بالتفصيل"></textarea>
 <button id="saveBtn">حفظ البلاغ</button>
 <p id="saveMsg"></p>
@@ -116,12 +134,13 @@ small{color:#607d8b}
 <button class="secondary" id="refreshBtn">تحديث البلاغات</button>
 <div id="requests">جاري تحميل البلاغات...</div>
 </div>
+
 </div>
 
 <div class="card hidden" id="technicianInfo">
 <h3>حساب الفني</h3>
-<p>تم تسجيل الدخول بنجاح، لكن واجهة متابعة بلاغات الفني لم تجهز بعد.</p>
-<p class="notice">سيتم استكمال تفعيل حسابك وإتاحة البلاغات بعد موافقة الإدارة.</p>
+<p>تم تسجيل الدخول بنجاح.</p>
+<p class="notice">حسابك في انتظار موافقة الإدارة. ستتاح لك متابعة البلاغات بعد اعتماد حسابك.</p>
 <button id="techLogout">تسجيل الخروج</button>
 </div>
 
@@ -151,17 +170,19 @@ $('showLogin').onclick=()=>showOnly('login');
 
 async function enterApp(user){
  currentUser=user;
+
  const {data,error}=await supabase.rpc('current_user_is_admin');
 
  if(error){
   showOnly('login');
-  $('loginMsg').textContent='تعذر التحقق من صلاحية الحساب. تواصل مع الإدارة.';
+  $('loginMsg').textContent='تعذر التحقق من صلاحية الحساب: '+error.message;
   return;
  }
 
  if(data===true){
   showOnly('dashboard');
   $('welcome').textContent='مرحباً '+user.email;
+  await loadTechnicians();
   await loadRequests();
  }else{
   showOnly('technicianInfo');
@@ -173,17 +194,21 @@ $('signupBtn').onclick=async()=>{
  const phone=$('phone').value.trim();
  const email=$('signupEmail').value.trim();
  const password=$('signupPassword').value;
- const specialties=[...document.querySelectorAll('input[name="specialty"]:checked')]
-  .map(x=>x.value);
+
+ const specialties=[
+  ...document.querySelectorAll('input[name="specialty"]:checked')
+ ].map(x=>x.value);
 
  if(!name||!phone||!email||!password){
   $('signupMsg').textContent='من فضلك أكمل البيانات';
   return;
  }
+
  if(password.length<6){
   $('signupMsg').textContent='كلمة المرور لازم تكون 6 أحرف على الأقل';
   return;
  }
+
  if(!specialties.length){
   $('signupMsg').textContent='اختار تخصص واحد على الأقل';
   return;
@@ -246,6 +271,113 @@ async function logout(){
  $('loginMsg').textContent='تم تسجيل الخروج';
 }
 
+async function loadTechnicians(){
+ $('techniciansList').textContent='جاري تحميل الفنيين...';
+ $('techMsg').textContent='';
+
+ const {data,error}=await supabase
+  .from('technicians')
+  .select('id,auth_user_id,full_name,phone,specialization,is_active,approval_status')
+  .order('created_at',{ascending:false});
+
+ if(error){
+  $('techniciansList').textContent='تعذر تحميل الفنيين: '+error.message;
+  return;
+ }
+
+ if(!data || !data.length){
+  $('techniciansList').textContent='لا يوجد فنيون مسجلون حتى الآن.';
+  return;
+ }
+
+ $('techniciansList').replaceChildren();
+
+ data.forEach(tech=>{
+  const box=document.createElement('div');
+  box.className='ticket';
+
+  const name=document.createElement('h3');
+  name.textContent=tech.full_name||'فني بدون اسم';
+
+  const phone=document.createElement('p');
+  phone.textContent='الموبايل: '+(tech.phone||'غير مسجل');
+
+  const specialty=document.createElement('p');
+  specialty.textContent='التخصصات: '+(tech.specialization||'غير محددة');
+
+  const status=document.createElement('p');
+  status.className='status';
+
+  if(tech.approval_status==='pending'){
+   status.textContent='الحالة: في انتظار الموافقة';
+  }else if(tech.approval_status==='approved'){
+   status.textContent=tech.is_active?'الحالة: معتمد ونشط':'الحالة: معتمد لكنه موقوف';
+  }else if(tech.approval_status==='rejected'){
+   status.textContent='الحالة: مرفوض';
+  }else{
+   status.textContent='الحالة: '+(tech.approval_status||'غير محددة');
+  }
+
+  const actions=document.createElement('div');
+  actions.className='actions';
+
+  if(tech.approval_status!=='approved'){
+   const approveBtn=document.createElement('button');
+   approveBtn.className='approve';
+   approveBtn.textContent='اعتماد وتفعيل';
+   approveBtn.onclick=()=>updateTechnician(
+    tech.id,'approved',true
+   );
+   actions.append(approveBtn);
+  }else{
+   const stopBtn=document.createElement('button');
+   stopBtn.className='stop';
+   stopBtn.textContent=tech.is_active?'إيقاف الفني':'إعادة تفعيل الفني';
+   stopBtn.onclick=()=>updateTechnician(
+    tech.id,'approved',!tech.is_active
+   );
+   actions.append(stopBtn);
+  }
+
+  if(tech.approval_status!=='rejected'){
+   const rejectBtn=document.createElement('button');
+   rejectBtn.className='reject';
+   rejectBtn.textContent='رفض الطلب';
+   rejectBtn.onclick=()=>{
+    if(confirm('هل أنت متأكد من رفض طلب هذا الفني؟')){
+     updateTechnician(tech.id,'rejected',false);
+    }
+   };
+   actions.append(rejectBtn);
+  }
+
+  box.append(name,phone,specialty,status,actions);
+  $('techniciansList').append(box);
+ });
+}
+
+async function updateTechnician(id,status,active){
+ $('techMsg').textContent='جاري تحديث بيانات الفني...';
+
+ const {error}=await supabase
+  .from('technicians')
+  .update({
+   approval_status:status,
+   is_active:active
+  })
+  .eq('id',id);
+
+ if(error){
+  $('techMsg').textContent='تعذر تحديث الفني: '+error.message;
+  return;
+ }
+
+ $('techMsg').textContent='تم تحديث حالة الفني بنجاح.';
+ await loadTechnicians();
+}
+
+$('refreshTechBtn').onclick=loadTechnicians;
+
 $('saveBtn').onclick=async()=>{
  if(!currentUser)return;
 
@@ -261,15 +393,15 @@ $('saveBtn').onclick=async()=>{
  $('saveMsg').textContent='جاري حفظ البلاغ...';
 
  const {error}=await supabase
- .from('maintenance_requests')
- .insert({
-  branch_name:branch,
-  problem_type:$('type').value,
-  priority:$('priority').value,
-  description,
-  reported_by:currentUser.id,
-  status:'جديد'
- });
+  .from('maintenance_requests')
+  .insert({
+   branch_name:branch,
+   problem_type:$('type').value,
+   priority:$('priority').value,
+   description,
+   reported_by:currentUser.id,
+   status:'جديد'
+  });
 
  $('saveBtn').disabled=false;
 

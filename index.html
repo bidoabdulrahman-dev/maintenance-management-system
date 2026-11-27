@@ -8,16 +8,22 @@
 <style>
 *{box-sizing:border-box}
 body{font-family:Arial;background:#f1f3f5;margin:0;color:#263238}
-header{background:#263238;color:white;padding:20px}
+header{background:#263238;color:white;padding:20px;text-align:center}
 main{max-width:850px;margin:20px auto;padding:12px}
 .card{background:white;padding:20px;margin:15px 0;border-radius:12px}
 input,select,textarea,button{width:100%;padding:12px;margin:8px 0;border-radius:7px;font-size:15px}
 input,select,textarea{border:1px solid #ccc}
 button{background:#37474f;color:white;border:0;cursor:pointer}
+button:disabled{opacity:.5}
 .secondary{background:#607d8b}
 .ticket{border:1px solid #ddd;border-radius:8px;padding:12px;margin:12px 0}
 .hidden{display:none}
 small{color:#607d8b}
+.specialties{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.specialties label{background:#f1f3f5;padding:10px;border-radius:7px}
+.specialties input{width:auto;margin-left:6px}
+.switch{text-align:center;color:#1565c0;cursor:pointer;padding:12px}
+.notice{background:#fff3cd;padding:12px;border-radius:8px;margin-top:12px}
 </style>
 </head>
 <body>
@@ -25,13 +31,47 @@ small{color:#607d8b}
 <h2>نظام إدارة الصيانة</h2>
 <p>Maintenance Management System</p>
 </header>
+
 <main>
+
 <div class="card" id="login">
-<h3>تسجيل دخول الإدارة</h3>
+<h3>تسجيل الدخول</h3>
 <input id="email" type="email" placeholder="البريد الإلكتروني">
 <input id="password" type="password" placeholder="كلمة المرور">
 <button id="loginBtn">دخول</button>
+<div class="switch" id="showSignup">ليس لديك حساب؟ إنشاء حساب فني جديد</div>
 <p id="loginMsg"></p>
+</div>
+
+<div class="card hidden" id="signup">
+<h3>إنشاء حساب فني جديد</h3>
+<input id="fullName" placeholder="الاسم بالكامل">
+<input id="phone" type="tel" placeholder="رقم الموبايل">
+<input id="signupEmail" type="email" placeholder="البريد الإلكتروني">
+<input id="signupPassword" type="password" placeholder="كلمة المرور - 6 أحرف على الأقل">
+
+<h4>اختار تخصصاتك</h4>
+<div class="specialties">
+<label><input type="checkbox" name="specialty" value="كهرباء"> كهرباء</label>
+<label><input type="checkbox" name="specialty" value="سباكة"> سباكة</label>
+<label><input type="checkbox" name="specialty" value="تكييف وتبريد"> تكييف وتبريد</label>
+<label><input type="checkbox" name="specialty" value="نقاشة ودهانات"> نقاشة ودهانات</label>
+<label><input type="checkbox" name="specialty" value="نجارة"> نجارة</label>
+<label><input type="checkbox" name="specialty" value="سيراميك وأرضيات"> سيراميك وأرضيات</label>
+<label><input type="checkbox" name="specialty" value="محارة وأعمال مدنية"> محارة وأعمال مدنية</label>
+<label><input type="checkbox" name="specialty" value="زجاج وألوميتال"> زجاج وألوميتال</label>
+<label><input type="checkbox" name="specialty" value="إنذار ومكافحة حريق"> إنذار ومكافحة حريق</label>
+<label><input type="checkbox" name="specialty" value="تيار خفيف وشبكات"> تيار خفيف وشبكات</label>
+<label><input type="checkbox" name="specialty" value="مصاعد"> مصاعد</label>
+<label><input type="checkbox" name="specialty" value="ميكانيكا ومضخات"> ميكانيكا ومضخات</label>
+<label><input type="checkbox" name="specialty" value="نظافة"> نظافة</label>
+<label><input type="checkbox" name="specialty" value="أمن وسلامة"> أمن وسلامة</label>
+<label><input type="checkbox" name="specialty" value="أخرى"> تخصصات أخرى</label>
+</div>
+
+<button id="signupBtn">إنشاء الحساب</button>
+<div class="switch" id="showLogin">لديك حساب بالفعل؟ تسجيل الدخول</div>
+<p id="signupMsg"></p>
 </div>
 
 <div id="dashboard" class="hidden">
@@ -47,8 +87,18 @@ small{color:#607d8b}
 <select id="type">
 <option value="كهرباء">كهرباء</option>
 <option value="سباكة">سباكة</option>
-<option value="تكييف">تكييف</option>
-<option value="أعمال مدنية">أعمال مدنية</option>
+<option value="تكييف وتبريد">تكييف وتبريد</option>
+<option value="نقاشة ودهانات">نقاشة ودهانات</option>
+<option value="نجارة">نجارة</option>
+<option value="سيراميك وأرضيات">سيراميك وأرضيات</option>
+<option value="أعمال مدنية ومحارة">أعمال مدنية ومحارة</option>
+<option value="زجاج وألوميتال">زجاج وألوميتال</option>
+<option value="إنذار ومكافحة حريق">إنذار ومكافحة حريق</option>
+<option value="تيار خفيف وشبكات">تيار خفيف وشبكات</option>
+<option value="مصاعد">مصاعد</option>
+<option value="ميكانيكا ومضخات">ميكانيكا ومضخات</option>
+<option value="نظافة">نظافة</option>
+<option value="أمن وسلامة">أمن وسلامة</option>
 <option value="أخرى">أخرى</option>
 </select>
 <select id="priority">
@@ -56,7 +106,7 @@ small{color:#607d8b}
 <option value="متوسطة">متوسطة</option>
 <option value="عاجلة">عاجلة</option>
 </select>
-<textarea id="description" rows="4" placeholder="اكتب وصف العطل بالتفصيل"></textarea>
+<textarea id="description" rows="4" placeholder="وصف العطل بالتفصيل"></textarea>
 <button id="saveBtn">حفظ البلاغ</button>
 <p id="saveMsg"></p>
 </div>
@@ -67,6 +117,14 @@ small{color:#607d8b}
 <div id="requests">جاري تحميل البلاغات...</div>
 </div>
 </div>
+
+<div class="card hidden" id="technicianInfo">
+<h3>حساب الفني</h3>
+<p>تم تسجيل الدخول بنجاح، لكن واجهة متابعة بلاغات الفني لم تجهز بعد.</p>
+<p class="notice">سيتم استكمال تفعيل حسابك وإتاحة البلاغات بعد موافقة الإدارة.</p>
+<button id="techLogout">تسجيل الخروج</button>
+</div>
+
 </main>
 
 <script type="module">
@@ -81,45 +139,124 @@ const supabase = createClient(
 const $ = id => document.getElementById(id);
 let currentUser = null;
 
-function showDashboard(user){
- currentUser=user;
- $('login').classList.add('hidden');
- $('dashboard').classList.remove('hidden');
- $('welcome').textContent='مرحباً '+user.email;
- loadRequests();
+function showOnly(id){
+ ['login','signup','dashboard','technicianInfo'].forEach(x=>{
+  $(x).classList.add('hidden');
+ });
+ $(id).classList.remove('hidden');
 }
 
-async function checkSession(){
- const {data}=await supabase.auth.getSession();
- if(data.session) showDashboard(data.session.user);
+$('showSignup').onclick=()=>showOnly('signup');
+$('showLogin').onclick=()=>showOnly('login');
+
+async function enterApp(user){
+ currentUser=user;
+ const {data,error}=await supabase.rpc('current_user_is_admin');
+
+ if(error){
+  showOnly('login');
+  $('loginMsg').textContent='تعذر التحقق من صلاحية الحساب. تواصل مع الإدارة.';
+  return;
+ }
+
+ if(data===true){
+  showOnly('dashboard');
+  $('welcome').textContent='مرحباً '+user.email;
+  await loadRequests();
+ }else{
+  showOnly('technicianInfo');
+ }
 }
+
+$('signupBtn').onclick=async()=>{
+ const name=$('fullName').value.trim();
+ const phone=$('phone').value.trim();
+ const email=$('signupEmail').value.trim();
+ const password=$('signupPassword').value;
+ const specialties=[...document.querySelectorAll('input[name="specialty"]:checked')]
+  .map(x=>x.value);
+
+ if(!name||!phone||!email||!password){
+  $('signupMsg').textContent='من فضلك أكمل البيانات';
+  return;
+ }
+ if(password.length<6){
+  $('signupMsg').textContent='كلمة المرور لازم تكون 6 أحرف على الأقل';
+  return;
+ }
+ if(!specialties.length){
+  $('signupMsg').textContent='اختار تخصص واحد على الأقل';
+  return;
+ }
+
+ $('signupBtn').disabled=true;
+ $('signupMsg').textContent='جاري إنشاء الحساب...';
+
+ const {data,error}=await supabase.auth.signUp({
+  email,
+  password,
+  options:{
+   data:{
+    full_name:name,
+    phone:phone,
+    specialization:specialties.join('، ')
+   }
+  }
+ });
+
+ $('signupBtn').disabled=false;
+
+ if(error){
+  $('signupMsg').textContent='تعذر إنشاء الحساب: '+error.message;
+  return;
+ }
+
+ if(data.session){
+  $('signupMsg').textContent='تم إنشاء الحساب. حسابك في انتظار موافقة الإدارة.';
+  showOnly('technicianInfo');
+ }else{
+  $('signupMsg').textContent='تم إرسال طلب التسجيل. راجع بريدك الإلكتروني لتأكيد الحساب، وبعدها انتظر موافقة الإدارة.';
+ }
+};
 
 $('loginBtn').onclick=async()=>{
  $('loginMsg').textContent='جاري تسجيل الدخول...';
+
  const {data,error}=await supabase.auth.signInWithPassword({
   email:$('email').value.trim(),
   password:$('password').value
  });
- if(error){$('loginMsg').textContent='خطأ: '+error.message;return;}
- showDashboard(data.user);
+
+ if(error){
+  $('loginMsg').textContent='تعذر الدخول: '+error.message;
+  return;
+ }
+
+ await enterApp(data.user);
 };
 
-$('logoutBtn').onclick=async()=>{
+$('logoutBtn').onclick=logout;
+$('techLogout').onclick=logout;
+
+async function logout(){
  await supabase.auth.signOut();
  currentUser=null;
- $('dashboard').classList.add('hidden');
- $('login').classList.remove('hidden');
+ showOnly('login');
  $('password').value='';
-};
+ $('loginMsg').textContent='تم تسجيل الخروج';
+}
 
 $('saveBtn').onclick=async()=>{
  if(!currentUser)return;
+
  const branch=$('branch').value.trim();
  const description=$('description').value.trim();
+
  if(!branch||!description){
   $('saveMsg').textContent='اكتب اسم الفرع ووصف العطل';
   return;
  }
+
  $('saveBtn').disabled=true;
  $('saveMsg').textContent='جاري حفظ البلاغ...';
 
@@ -129,16 +266,18 @@ $('saveBtn').onclick=async()=>{
   branch_name:branch,
   problem_type:$('type').value,
   priority:$('priority').value,
-  description:description,
+  description,
   reported_by:currentUser.id,
   status:'جديد'
  });
 
  $('saveBtn').disabled=false;
+
  if(error){
   $('saveMsg').textContent='تعذر الحفظ: '+error.message;
   return;
  }
+
  $('saveMsg').textContent='تم حفظ البلاغ بنجاح';
  $('branch').value='';
  $('description').value='';
@@ -147,6 +286,7 @@ $('saveBtn').onclick=async()=>{
 
 async function loadRequests(){
  $('requests').textContent='جاري تحميل البلاغات...';
+
  const {data,error}=await supabase
   .from('maintenance_requests')
   .select('id,branch_name,problem_type,priority,description,status,created_at')
@@ -156,28 +296,42 @@ async function loadRequests(){
   $('requests').textContent='تعذر تحميل البلاغات: '+error.message;
   return;
  }
+
  if(!data.length){
   $('requests').textContent='لا توجد بلاغات حتى الآن';
   return;
  }
+
  $('requests').replaceChildren();
+
  data.forEach(item=>{
   const box=document.createElement('div');
   box.className='ticket';
+
   const title=document.createElement('strong');
   title.textContent=item.branch_name||'فرع غير محدد';
+
   const details=document.createElement('p');
   details.textContent=(item.problem_type||'')+' | '+(item.priority||'');
+
   const desc=document.createElement('p');
   desc.textContent=item.description||'';
+
   const status=document.createElement('small');
   status.textContent='الحالة: '+(item.status||'جديد');
+
   box.append(title,details,desc,status);
   $('requests').append(box);
  });
 }
 
 $('refreshBtn').onclick=loadRequests;
+
+async function checkSession(){
+ const {data}=await supabase.auth.getSession();
+ if(data.session) await enterApp(data.session.user);
+}
+
 checkSession();
 </script>
 </body>

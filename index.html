@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -19,18 +18,18 @@ button:disabled{opacity:.5}
 .approve{background:#2e7d32}
 .reject{background:#c62828}
 .stop{background:#ef6c00}
-.ticket{border:1px solid #ddd;border-radius:8px;padding:12px;margin:12px 0}
 .hidden{display:none!important}
 .switch{text-align:center;color:#1565c0;cursor:pointer;padding:12px}
 .notice{background:#fff3cd;padding:12px;border-radius:8px;margin-top:12px}
-.status{padding:6px 10px;border-radius:6px;display:inline-block;margin:5px 0;background:#eee}
+.status{padding:6px 10px;border-radius:6px;display:inline-block;background:#eee}
+.ticket{border:1px solid #ddd;border-radius:8px;padding:12px;margin:12px 0}
 .actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.success{background:#e8f5e9;padding:12px;border-radius:8px}
-.error{background:#ffebee;padding:12px;border-radius:8px}
 .specialties{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .specialties label{background:#f1f3f5;padding:10px;border-radius:7px}
-.specialties input{width:auto;margin-left:6px}
-.profile-photo{width:110px;height:110px;border-radius:50%;object-fit:cover;background:#eee;display:block;margin:10px auto}
+.specialties input{width:auto}
+.profile-photo{width:110px;height:110px;border-radius:50%;object-fit:cover;display:block;margin:10px auto;background:#eee}
+.success{background:#e8f5e9;padding:12px;border-radius:8px}
+.error{background:#ffebee;padding:12px;border-radius:8px}
 small{color:#607d8b}
 </style>
 </head>
@@ -43,7 +42,11 @@ small{color:#607d8b}
 
 <main>
 
-<div class="card" id="login">
+<div id="systemMessage" class="notice">
+جاري تشغيل النظام...
+</div>
+
+<section class="card" id="login">
 <h3>تسجيل الدخول</h3>
 <input id="email" type="email" placeholder="البريد الإلكتروني">
 <input id="password" type="password" placeholder="كلمة المرور">
@@ -51,9 +54,9 @@ small{color:#607d8b}
 <button class="secondary" id="forgotBtn">نسيت كلمة المرور؟</button>
 <div class="switch" id="showSignup">ليس لديك حساب؟ إنشاء حساب فني جديد</div>
 <p id="loginMsg"></p>
-</div>
+</section>
 
-<div class="card hidden" id="signup">
+<section class="card hidden" id="signup">
 <h3>إنشاء حساب فني جديد</h3>
 <input id="fullName" placeholder="الاسم بالكامل">
 <input id="phone" type="tel" placeholder="رقم الموبايل">
@@ -64,9 +67,9 @@ small{color:#607d8b}
 <button id="signupBtn">إنشاء الحساب</button>
 <div class="switch" id="showLogin">لديك حساب بالفعل؟ تسجيل الدخول</div>
 <p id="signupMsg"></p>
-</div>
+</section>
 
-<div id="dashboard" class="hidden">
+<section id="dashboard" class="hidden">
 <div class="card">
 <h3>لوحة تحكم الإدارة</h3>
 <p id="welcome"></p>
@@ -75,13 +78,13 @@ small{color:#607d8b}
 
 <div class="card">
 <h3>إدارة الفنيين</h3>
-<button class="secondary" id="refreshTechBtn">تحديث قائمة الفنيين</button>
-<div id="techniciansList">جاري تحميل الفنيين...</div>
+<button class="secondary" id="refreshTechBtn">تحديث الفنيين</button>
+<div id="techniciansList"></div>
 <p id="techMsg"></p>
 </div>
 
 <div class="card">
-<h3>إنشاء بلاغ صيانة جديد</h3>
+<h3>إنشاء بلاغ صيانة</h3>
 <input id="branch" placeholder="اسم الفرع">
 <select id="type"></select>
 <select id="priority">
@@ -97,19 +100,19 @@ small{color:#607d8b}
 <div class="card">
 <h3>البلاغات المسجلة</h3>
 <button class="secondary" id="refreshBtn">تحديث البلاغات</button>
-<div id="requests">جاري تحميل البلاغات...</div>
+<div id="requests"></div>
 </div>
-</div>
+</section>
 
-<div class="card hidden" id="technicianInfo">
+<section class="card hidden" id="technicianInfo">
 <h3>حساب الفني</h3>
 <p id="technicianName"></p>
 <p id="technicianStatus"></p>
 <div id="waitingNotice" class="notice">حسابك في انتظار موافقة الإدارة.</div>
 <button id="techLogout">تسجيل الخروج</button>
-</div>
+</section>
 
-<div id="technicianDashboard" class="hidden">
+<section id="technicianDashboard" class="hidden">
 <div class="card">
 <h3>لوحة الفني</h3>
 <p id="techWelcome"></p>
@@ -123,12 +126,12 @@ small{color:#607d8b}
 <label>صورة البروفايل</label>
 <input id="profilePhoto" type="file" accept="image/*">
 <input id="profileName" placeholder="الاسم بالكامل">
-<input id="profilePhone" type="tel" placeholder="رقم الموبايل">
-<input id="profileUsername" placeholder="اسم المستخدم - Username">
-<input id="profileAddress" placeholder="العنوان بالتفصيل">
+<input id="profilePhone" placeholder="رقم الموبايل">
+<input id="profileUsername" placeholder="اسم المستخدم">
+<input id="profileAddress" placeholder="العنوان">
 <input id="profileCity" placeholder="المدينة">
 <input id="profileExperience" type="number" min="0" placeholder="سنوات الخبرة">
-<textarea id="profileBio" rows="3" placeholder="نبذة عن خبراتك ومهاراتك"></textarea>
+<textarea id="profileBio" placeholder="نبذة عن خبراتك"></textarea>
 <h4>التخصصات</h4>
 <div class="specialties" id="profileSpecialties"></div>
 <button id="saveProfileBtn">حفظ الملف الشخصي</button>
@@ -137,7 +140,6 @@ small{color:#607d8b}
 
 <div class="card">
 <h3>مشاركة الموقع مع الإدارة</h3>
-<p>مشاركة الموقع اختيارية. لن يبدأ إرسال موقعك إلا بعد الضغط على زر التشغيل والسماح للمتصفح.</p>
 <p id="locationStatus" class="notice">مشاركة الموقع متوقفة.</p>
 <button class="secondary" id="retryLocationBtn">بدء مشاركة الموقع</button>
 <button class="stop" id="stopLocationBtn">إيقاف مشاركة الموقع</button>
@@ -145,379 +147,93 @@ small{color:#607d8b}
 
 <div class="card">
 <h3>بلاغاتي</h3>
-<p>سيتم ربط البلاغات المسندة إليك والتقارير الفنية في المرحلة التالية.</p>
+<p>سيتم ربط البلاغات المسندة والتقارير الفنية في المرحلة التالية.</p>
 </div>
-</div>
+</section>
 
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <script>
-const supabase = window.supabase.createClient(
-  'https://jakozzeeomgfphezticw.supabase.co',
-  'sb_publishable_CbNZXmPEeN8Dzl7AC1RAbw_fB0Wty6e'
-);
-'https://jakozzeeomgfphezticw.supabase.co',
-'sb_publishable_CbNZXmPEeN8Dzl7AC1RAbw_fB0Wty6e'
-);
+(function(){
+
+"use strict";
 
 const $ = id => document.getElementById(id);
 
-const specialties = [
-'كهرباء','سباكة','تكييف وتبريد','نقاشة ودهانات',
-'نجارة','سيراميك وأرضيات','محارة وأعمال مدنية',
-'زجاج وألوميتال','إنذار ومكافحة حريق',
-'تيار خفيف وشبكات','مصاعد','ميكانيكا ومضخات',
-'نظافة','أمن وسلامة','أخرى'
-];
+function message(id,text,type){
+  const el=$(id);
+  if(!el)return;
+  el.textContent=text;
+  el.className=type||"";
+}
 
-specialties.forEach(s=>{
-  $('signupSpecialties').insertAdjacentHTML(
-    'beforeend',
-    `<label><input type="checkbox" name="signupSpecialty" value="${s}"> ${s}</label>`
-  );
-  $('profileSpecialties').insertAdjacentHTML(
-    'beforeend',
-    `<label><input type="checkbox" name="profileSpecialty" value="${s}"> ${s}</label>`
-  );
-  $('type').insertAdjacentHTML(
-    'beforeend',`<option value="${s}">${s}</option>`
-  );
+window.addEventListener("error",function(e){
+  message("systemMessage","حدث خطأ في تشغيل النظام: "+e.message,"error");
 });
 
-let currentUser = null;
-let currentTech = null;
-let locationWatchId = null;
+window.addEventListener("unhandledrejection",function(e){
+  const reason=e.reason;
+  message("systemMessage","خطأ غير متوقع: "+(reason?.message||reason),"error");
+});
+
+if(!window.supabase){
+  message("systemMessage","تعذر تحميل مكتبة النظام. تأكد من اتصال الإنترنت وافتح الصفحة مرة أخرى.","error");
+  return;
+}
+
+const supabase=window.supabase.createClient(
+  "https://jakozzeeomgfphezticw.supabase.co",
+  "sb_publishable_CbNZXmPEeN8Dzl7AC1RAbw_fB0Wty6e"
+);
+
+const specialties=[
+"كهرباء","سباكة","تكييف وتبريد","نقاشة ودهانات",
+"نجارة","سيراميك وأرضيات","محارة وأعمال مدنية",
+"زجاج وألوميتال","إنذار ومكافحة حريق",
+"تيار خفيف وشبكات","مصاعد","ميكانيكا ومضخات",
+"نظافة","أمن وسلامة","أخرى"
+];
+
+let currentUser=null;
+let currentTech=null;
+let locationWatchId=null;
 
 function showOnly(id){
-  ['login','signup','dashboard','technicianInfo','technicianDashboard']
-  .forEach(x=>$(x).classList.add('hidden'));
-  $(id).classList.remove('hidden');
+  ["login","signup","dashboard","technicianInfo","technicianDashboard"]
+  .forEach(x=>$(x).classList.add("hidden"));
+  $(id).classList.remove("hidden");
 }
 
-function selectedSpecialties(group){
-  return [...document.querySelectorAll(
-    `input[name="${group}"]:checked`
-  )].map(x=>x.value);
+function selected(group){
+  return [...document.querySelectorAll('input[name="'+group+'"]:checked')]
+  .map(x=>x.value);
 }
 
-function setSpecialties(group, values){
-  document.querySelectorAll(`input[name="${group}"]`).forEach(x=>{
-    x.checked = values.includes(x.value);
+function setSelected(group,values){
+  document.querySelectorAll('input[name="'+group+'"]').forEach(x=>{
+    x.checked=values.includes(x.value);
   });
 }
 
-$('showSignup').onclick=()=>showOnly('signup');
-$('showLogin').onclick=()=>showOnly('login');
+function buildOptions(){
+  specialties.forEach(s=>{
+    $("signupSpecialties").insertAdjacentHTML(
+      "beforeend",
+      `<label><input type="checkbox" name="signupSpecialty" value="${s}"> ${s}</label>`
+    );
 
-async function enterApp(user){
-  stopLocation();
-  currentUser=user;
+    $("profileSpecialties").insertAdjacentHTML(
+      "beforeend",
+      `<label><input type="checkbox" name="profileSpecialty" value="${s}"> ${s}</label>`
+    );
 
-  const {data:admin,error:adminError}=await supabase.rpc(
-    'current_user_is_admin'
-  );
-
-  if(adminError){
-    showOnly('login');
-    $('loginMsg').textContent='تعذر التحقق من الصلاحية: '+adminError.message;
-    return;
-  }
-
-  if(admin===true){
-    showOnly('dashboard');
-    $('welcome').textContent='مرحباً '+(user.email||'بالإدارة');
-    await loadTechnicians();
-    await loadRequests();
-    return;
-  }
-
-  const {data:tech,error}=await supabase
-    .from('technicians')
-    .select('*')
-    .eq('auth_user_id',user.id)
-    .maybeSingle();
-
-  if(error){
-    showOnly('login');
-    $('loginMsg').textContent='تعذر قراءة بيانات الفني: '+error.message;
-    return;
-  }
-
-  if(!tech){
-    showOnly('technicianInfo');
-    $('technicianName').textContent='لم يتم العثور على بيانات الفني.';
-    $('waitingNotice').textContent='يرجى التواصل مع الإدارة.';
-    return;
-  }
-
-  currentTech=tech;
-  $('technicianName').textContent='أهلاً '+(tech.full_name||'');
-  $('technicianStatus').textContent='التخصصات: '+(tech.specialization||'غير محددة');
-
-  if(tech.approval_status==='rejected'){
-    showOnly('technicianInfo');
-    $('waitingNotice').textContent='تم رفض طلب التسجيل. يرجى التواصل مع الإدارة.';
-    return;
-  }
-
-  if(tech.approval_status!=='approved'){
-    showOnly('technicianInfo');
-    $('waitingNotice').textContent='حسابك في انتظار موافقة الإدارة.';
-    return;
-  }
-
-  if(tech.is_active!==true){
-    showOnly('technicianInfo');
-    $('waitingNotice').textContent='حسابك معتمد لكنه موقوف حاليًا.';
-    return;
-  }
-
-  showOnly('technicianDashboard');
-  $('techWelcome').textContent='مرحباً '+(tech.full_name||'فني');
-  $('techSpecialty').textContent='التخصصات: '+(tech.specialization||'غير محددة');
-  fillProfile(tech);
-}
-
-function fillProfile(tech){
-  $('profileName').value=tech.full_name||'';
-  $('profilePhone').value=tech.phone||'';
-  $('profileUsername').value=tech.username||'';
-  $('profileAddress').value=tech.address||'';
-  $('profileCity').value=tech.city||'';
-  $('profileExperience').value=tech.years_experience??'';
-  $('profileBio').value=tech.bio||'';
-
-  const values=(tech.specialization||'')
-    .split(/[،,]/).map(x=>x.trim()).filter(Boolean);
-  setSpecialties('profileSpecialty',values);
-
-  $('profilePreview').src=tech.profile_photo_url||
-    'https://placehold.co/110x110?text=Profile';
-}
-
-$('signupBtn').onclick=async()=>{
-  const name=$('fullName').value.trim();
-  const phone=$('phone').value.trim();
-  const email=$('signupEmail').value.trim();
-  const password=$('signupPassword').value;
-  const chosen=selectedSpecialties('signupSpecialty');
-
-  if(!name||!phone||!email||!password){
-    $('signupMsg').textContent='من فضلك أكمل البيانات';
-    return;
-  }
-  if(password.length<6){
-    $('signupMsg').textContent='كلمة المرور لازم تكون 6 أحرف على الأقل';
-    return;
-  }
-  if(!chosen.length){
-    $('signupMsg').textContent='اختار تخصص واحد على الأقل';
-    return;
-  }
-
-  $('signupBtn').disabled=true;
-  $('signupMsg').textContent='جاري إنشاء الحساب...';
-
-  const {data,error}=await supabase.auth.signUp({
-    email,password,
-    options:{data:{
-      full_name:name,
-      phone,
-      specialization:chosen.join('، ')
-    }}
+    $("type").insertAdjacentHTML(
+      "beforeend",
+      `<option value="${s}">${s}</option>`
+    );
   });
-
-  $('signupBtn').disabled=false;
-
-  if(error){
-    $('signupMsg').textContent='تعذر إنشاء الحساب: '+error.message;
-    return;
-  }
-
-  if(data.session){
-    $('signupMsg').textContent='تم التسجيل وبانتظار موافقة الإدارة.';
-    await enterApp(data.user);
-  }else{
-    $('signupMsg').textContent='تم إرسال طلب التسجيل. راجع بريدك لتأكيد الحساب ثم انتظر موافقة الإدارة.';
-  }
-};
-
-$('loginBtn').onclick=async()=>{
-  $('loginMsg').textContent='جاري تسجيل الدخول...';
-  $('loginBtn').disabled=true;
-
-  const {data,error}=await supabase.auth.signInWithPassword({
-    email:$('email').value.trim(),
-    password:$('password').value
-  });
-
-  $('loginBtn').disabled=false;
-
-  if(error){
-    $('loginMsg').textContent='تعذر الدخول: '+error.message;
-    return;
-  }
-  await enterApp(data.user);
-};
-
-$('forgotBtn').onclick=async()=>{
-  const email=$('email').value.trim();
-  if(!email){
-    $('loginMsg').textContent='اكتب بريدك الإلكتروني أولاً.';
-    return;
-  }
-  $('loginMsg').textContent='جاري إرسال رابط استعادة كلمة المرور...';
-  const {error}=await supabase.auth.resetPasswordForEmail(email,{
-    redirectTo:location.origin
-  });
-  $('loginMsg').textContent=error?
-    'تعذر الإرسال: '+error.message:
-    'لو البريد مسجل، هيوصلك رابط استعادة كلمة المرور.';
-};
-
-async function logout(){
-  stopLocation();
-  await supabase.auth.signOut();
-  currentUser=null;
-  currentTech=null;
-  showOnly('login');
-  $('password').value='';
-  $('loginMsg').textContent='تم تسجيل الخروج';
-}
-
-$('logoutBtn').onclick=logout;
-$('techLogout').onclick=logout;
-$('techLogout2').onclick=logout;
-
-$('profilePhoto').onchange=()=>{
-  const file=$('profilePhoto').files[0];
-  if(!file)return;
-  if(!file.type.startsWith('image/')){
-    $('profileMsg').textContent='اختار ملف صورة صحيح.';
-    return;
-  }
-  if(file.size>5*1024*1024){
-    $('profileMsg').textContent='حجم الصورة أكبر من 5 ميجابايت.';
-    return;
-  }
-  $('profilePreview').src=URL.createObjectURL(file);
-};
-
-$('saveProfileBtn').onclick=async()=>{
-  if(!currentUser||!currentTech)return;
-
-  const name=$('profileName').value.trim();
-  const phone=$('profilePhone').value.trim();
-  const username=$('profileUsername').value.trim().toLowerCase();
-  const chosen=selectedSpecialties('profileSpecialty');
-
-  if(!name||!phone||!chosen.length){
-    $('profileMsg').textContent='الاسم والموبايل وتخصص واحد على الأقل مطلوبين.';
-    return;
-  }
-
-  if(username && !/^[a-z0-9_]{3,20}$/.test(username)){
-    $('profileMsg').textContent='اسم المستخدم من 3 إلى 20 حرفًا، إنجليزي أو أرقام أو _ فقط.';
-    return;
-  }
-
-  $('saveProfileBtn').disabled=true;
-  $('profileMsg').textContent='جاري حفظ البيانات...';
-
-  let photoUrl=currentTech.profile_photo_url||null;
-  const file=$('profilePhoto').files[0];
-
-  if(file){
-    const ext=file.name.split('.').pop().toLowerCase();
-    const path=`${currentUser.id}/${Date.now()}.${ext}`;
-
-    const {error:uploadError}=await supabase.storage
-      .from('technician-profiles')
-      .upload(path,file,{upsert:true,contentType:file.type});
-
-    if(uploadError){
-      $('saveProfileBtn').disabled=false;
-      $('profileMsg').textContent='تعذر رفع الصورة: '+uploadError.message;
-      return;
-    }
-
-    const {data:urlData}=supabase.storage
-      .from('technician-profiles')
-      .getPublicUrl(path);
-    photoUrl=urlData.publicUrl;
-  }
-
-  const payload={
-    full_name:name,
-    phone,
-    username,
-    address:$('profileAddress').value.trim(),
-    city:$('profileCity').value.trim(),
-    bio:$('profileBio').value.trim(),
-    years_experience:Number($('profileExperience').value||0),
-    specialization:chosen.join('، '),
-    profile_photo_url:photoUrl
-  };
-
-  const {data,error}=await supabase.rpc(
-    'update_my_technician_profile',
-    {p_data:payload}
-  );
-
-  $('saveProfileBtn').disabled=false;
-
-  if(error){
-    $('profileMsg').textContent='تعذر حفظ البيانات: '+error.message;
-    return;
-  }
-
-  if(data!==true){
-    $('profileMsg').textContent='لم يتم العثور على سجل الفني لتحديثه.';
-    return;
-  }
-
-  currentTech={...currentTech,...payload};
-  $('techWelcome').textContent='مرحباً '+name;
-  $('techSpecialty').textContent='التخصصات: '+payload.specialization;
-  $('profileMsg').textContent='تم حفظ الملف الشخصي بنجاح.';
-  $('profilePhoto').value='';
-};
-
-function startLocation(){
-  if(!currentUser||locationWatchId!==null)return;
-  if(!navigator.geolocation){
-    $('locationStatus').textContent='المتصفح لا يدعم تحديد الموقع.';
-    return;
-  }
-
-  $('locationStatus').textContent='في انتظار إذن الموقع...';
-
-  locationWatchId=navigator.geolocation.watchPosition(
-    async position=>{
-      if(!currentUser||!currentTech)return;
-
-      const {error}=await supabase
-        .from('technician_locations')
-        .upsert({
-          auth_user_id:currentUser.id,
-          latitude:position.coords.latitude,
-          longitude:position.coords.longitude,
-          updated_at:new Date().toISOString()
-        },{onConflict:'auth_user_id'});
-
-      $('locationStatus').textContent=error?
-        'تعذر تحديث الموقع: '+error.message:
-        'مشاركة الموقع مفعلة والإدارة تستقبل آخر تحديث.';
-    },
-    error=>{
-      locationWatchId=null;
-      $('locationStatus').textContent=
-        error.code===1?'لم تسمح بمشاركة الموقع.':
-        'تعذر تحديد الموقع. تأكد من تشغيل GPS.';
-    },
-    {enableHighAccuracy:true,maximumAge:10000,timeout:20000}
-  );
 }
 
 function stopLocation(){
@@ -527,152 +243,458 @@ function stopLocation(){
   locationWatchId=null;
 }
 
-$('retryLocationBtn').onclick=()=>{
+async function logout(){
+  stopLocation();
+  await supabase.auth.signOut();
+  currentUser=null;
+  currentTech=null;
+  $("password").value="";
+  showOnly("login");
+  message("loginMsg","تم تسجيل الخروج","success");
+}
+
+async function enterApp(user){
+  currentUser=user;
+  stopLocation();
+
+  message("systemMessage","جاري التحقق من صلاحيات الحساب...","notice");
+
+  const {data:admin,error:adminError}=await supabase.rpc("current_user_is_admin");
+
+  if(adminError){
+    showOnly("login");
+    message("loginMsg","تعذر التحقق من الصلاحية: "+adminError.message,"error");
+    return;
+  }
+
+  if(admin===true){
+    showOnly("dashboard");
+    $("welcome").textContent="مرحباً بالإدارة";
+    await loadTechnicians();
+    await loadRequests();
+    return;
+  }
+
+  const {data:tech,error}=await supabase
+    .from("technicians")
+    .select("*")
+    .eq("auth_user_id",user.id)
+    .maybeSingle();
+
+  if(error){
+    showOnly("login");
+    message("loginMsg","تعذر قراءة بيانات الفني: "+error.message,"error");
+    return;
+  }
+
+  if(!tech){
+    showOnly("technicianInfo");
+    $("technicianName").textContent="لم يتم العثور على بيانات الفني.";
+    $("waitingNotice").textContent="يرجى التواصل مع الإدارة.";
+    return;
+  }
+
+  currentTech=tech;
+
+  $("technicianName").textContent="أهلاً "+(tech.full_name||"");
+  $("technicianStatus").textContent="التخصصات: "+(tech.specialization||"غير محددة");
+
+  if(tech.approval_status!=="approved"){
+    showOnly("technicianInfo");
+    $("waitingNotice").textContent=
+      tech.approval_status==="rejected"
+      ?"تم رفض طلب التسجيل. يرجى التواصل مع الإدارة."
+      :"حسابك في انتظار موافقة الإدارة.";
+    return;
+  }
+
+  if(tech.is_active!==true){
+    showOnly("technicianInfo");
+    $("waitingNotice").textContent="حسابك معتمد لكنه موقوف حالياً.";
+    return;
+  }
+
+  showOnly("technicianDashboard");
+  $("techWelcome").textContent="مرحباً "+(tech.full_name||"فني");
+  $("techSpecialty").textContent="التخصصات: "+(tech.specialization||"");
+  fillProfile(tech);
+}
+
+function fillProfile(tech){
+  $("profileName").value=tech.full_name||"";
+  $("profilePhone").value=tech.phone||"";
+  $("profileUsername").value=tech.username||"";
+  $("profileAddress").value=tech.address||"";
+  $("profileCity").value=tech.city||"";
+  $("profileExperience").value=tech.years_experience??"";
+  $("profileBio").value=tech.bio||"";
+
+  const values=(tech.specialization||"")
+    .split(/[،,]/).map(x=>x.trim()).filter(Boolean);
+
+  setSelected("profileSpecialty",values);
+
+  $("profilePreview").src=tech.profile_photo_url||
+    "https://placehold.co/110x110?text=Profile";
+}
+
+$("showSignup").onclick=()=>showOnly("signup");
+$("showLogin").onclick=()=>showOnly("login");
+
+$("signupBtn").onclick=async()=>{
+  const name=$("fullName").value.trim();
+  const phone=$("phone").value.trim();
+  const email=$("signupEmail").value.trim();
+  const password=$("signupPassword").value;
+  const chosen=selected("signupSpecialty");
+
+  if(!name||!phone||!email||!password){
+    message("signupMsg","من فضلك أكمل البيانات المطلوبة.","error");
+    return;
+  }
+
+  if(password.length<6){
+    message("signupMsg","كلمة المرور يجب أن تكون 6 أحرف على الأقل.","error");
+    return;
+  }
+
+  if(!chosen.length){
+    message("signupMsg","اختار تخصصاً واحداً على الأقل.","error");
+    return;
+  }
+
+  $("signupBtn").disabled=true;
+  message("signupMsg","جاري إنشاء الحساب...","notice");
+
+  try{
+    const {data,error}=await supabase.auth.signUp({
+      email,
+      password,
+      options:{
+        data:{
+          full_name:name,
+          phone,
+          specialization:chosen.join("، ")
+        }
+      }
+    });
+
+    if(error)throw error;
+
+    if(data.session){
+      message("signupMsg","تم التسجيل بنجاح. حسابك في انتظار موافقة الإدارة.","success");
+      await enterApp(data.user);
+    }else{
+      message("signupMsg","تم إنشاء الطلب. راجع بريدك لتأكيد الحساب ثم انتظر موافقة الإدارة.","success");
+    }
+  }catch(e){
+    message("signupMsg","تعذر إنشاء الحساب: "+e.message,"error");
+  }finally{
+    $("signupBtn").disabled=false;
+  }
+};
+
+$("loginBtn").onclick=async()=>{
+  const email=$("email").value.trim();
+  const password=$("password").value;
+
+  if(!email||!password){
+    message("loginMsg","اكتب البريد الإلكتروني وكلمة المرور.","error");
+    return;
+  }
+
+  $("loginBtn").disabled=true;
+  message("loginMsg","جاري تسجيل الدخول...","notice");
+
+  try{
+    const {data,error}=await supabase.auth.signInWithPassword({
+      email,password
+    });
+
+    if(error)throw error;
+
+    await enterApp(data.user);
+  }catch(e){
+    message("loginMsg","تعذر الدخول: "+e.message,"error");
+  }finally{
+    $("loginBtn").disabled=false;
+  }
+};
+
+$("forgotBtn").onclick=async()=>{
+  const email=$("email").value.trim();
+
+  if(!email){
+    message("loginMsg","اكتب بريدك الإلكتروني أولاً.","error");
+    return;
+  }
+
+  message("loginMsg","جاري إرسال رابط الاستعادة...","notice");
+
+  try{
+    const {error}=await supabase.auth.resetPasswordForEmail(email,{
+      redirectTo:location.origin
+    });
+
+    if(error)throw error;
+
+    message("loginMsg","لو البريد مسجل، هيوصلك رابط استعادة كلمة المرور.","success");
+  }catch(e){
+    message("loginMsg","تعذر الإرسال: "+e.message,"error");
+  }
+};
+
+$("logoutBtn").onclick=logout;
+$("techLogout").onclick=logout;
+$("techLogout2").onclick=logout;
+
+$("profilePhoto").onchange=()=>{
+  const file=$("profilePhoto").files[0];
+  if(!file)return;
+
+  if(!file.type.startsWith("image/")){
+    message("profileMsg","اختار ملف صورة صحيح.","error");
+    return;
+  }
+
+  if(file.size>5*1024*1024){
+    message("profileMsg","حجم الصورة أكبر من 5 ميجابايت.","error");
+    return;
+  }
+
+  $("profilePreview").src=URL.createObjectURL(file);
+};
+
+$("saveProfileBtn").onclick=async()=>{
+  if(!currentUser||!currentTech)return;
+
+  const name=$("profileName").value.trim();
+  const phone=$("profilePhone").value.trim();
+  const username=$("profileUsername").value.trim().toLowerCase();
+  const chosen=selected("profileSpecialty");
+
+  if(!name||!phone||!chosen.length){
+    message("profileMsg","الاسم والموبايل وتخصص واحد على الأقل مطلوبين.","error");
+    return;
+  }
+
+  if(username&&!/^[a-z0-9_]{3,20}$/.test(username)){
+    message("profileMsg","اسم المستخدم يجب أن يكون 3 إلى 20 حرفاً إنجليزياً أو رقماً أو _.","error");
+    return;
+  }
+
+  $("saveProfileBtn").disabled=true;
+  message("profileMsg","جاري حفظ البيانات...","notice");
+
+  try{
+    let photoUrl=currentTech.profile_photo_url||null;
+    const file=$("profilePhoto").files[0];
+
+    if(file){
+      const ext=file.name.split(".").pop().toLowerCase();
+      const path=currentUser.id+"/"+Date.now()+"."+ext;
+
+      const {error:uploadError}=await supabase.storage
+        .from("technician-profiles")
+        .upload(path,file,{upsert:true,contentType:file.type});
+
+      if(uploadError)throw uploadError;
+
+      const {data:urlData}=supabase.storage
+        .from("technician-profiles")
+        .getPublicUrl(path);
+
+      photoUrl=urlData.publicUrl;
+    }
+
+    const payload={
+      full_name:name,
+      phone,
+      username,
+      address:$("profileAddress").value.trim(),
+      city:$("profileCity").value.trim(),
+      bio:$("profileBio").value.trim(),
+      years_experience:Number($("profileExperience").value||0),
+      specialization:chosen.join("، "),
+      profile_photo_url:photoUrl
+    };
+
+    const {data,error}=await supabase.rpc(
+      "update_my_technician_profile",
+      {p_data:payload}
+    );
+
+    if(error)throw error;
+    if(data!==true)throw new Error("لم يتم العثور على سجل الفني.");
+
+    currentTech={...currentTech,...payload};
+    $("techWelcome").textContent="مرحباً "+name;
+    $("techSpecialty").textContent="التخصصات: "+payload.specialization;
+    $("profilePhoto").value="";
+    message("profileMsg","تم حفظ الملف الشخصي بنجاح.","success");
+
+  }catch(e){
+    message("profileMsg","تعذر حفظ البيانات: "+e.message,"error");
+  }finally{
+    $("saveProfileBtn").disabled=false;
+  }
+};
+
+function startLocation(){
+  if(!currentUser||!currentTech||locationWatchId!==null)return;
+
+  if(!navigator.geolocation){
+    message("locationStatus","المتصفح لا يدعم تحديد الموقع.","error");
+    return;
+  }
+
+  message("locationStatus","في انتظار إذن الموقع...","notice");
+
+  locationWatchId=navigator.geolocation.watchPosition(
+    async position=>{
+      try{
+        const {error}=await supabase
+          .from("technician_locations")
+          .upsert({
+            auth_user_id:currentUser.id,
+            latitude:position.coords.latitude,
+            longitude:position.coords.longitude,
+            updated_at:new Date().toISOString()
+          },{onConflict:"auth_user_id"});
+
+        if(error)throw error;
+
+        message("locationStatus","مشاركة الموقع مفعلة.","success");
+      }catch(e){
+        message("locationStatus","تعذر تحديث الموقع: "+e.message,"error");
+      }
+    },
+    error=>{
+      locationWatchId=null;
+      message("locationStatus",
+        error.code===1?"لم تسمح بمشاركة الموقع.":"تعذر تحديد الموقع. تأكد من تشغيل GPS.",
+        "error"
+      );
+    },
+    {enableHighAccuracy:true,maximumAge:10000,timeout:20000}
+  );
+}
+
+$("retryLocationBtn").onclick=()=>{
   stopLocation();
   startLocation();
 };
 
-$('stopLocationBtn').onclick=()=>{
+$("stopLocationBtn").onclick=()=>{
   stopLocation();
-  $('locationStatus').textContent='مشاركة الموقع متوقفة.';
+  message("locationStatus","مشاركة الموقع متوقفة.","notice");
 };
 
 async function loadTechnicians(){
-  $('techniciansList').textContent='جاري تحميل الفنيين...';
-  const {data,error}=await supabase.from('technicians')
-    .select('id,full_name,phone,specialization,is_active,approval_status')
-    .order('created_at',{ascending:false});
+  $("techniciansList").textContent="جاري تحميل الفنيين...";
+
+  const {data,error}=await supabase.from("technicians")
+    .select("id,full_name,phone,specialization,is_active,approval_status")
+    .order("created_at",{ascending:false});
 
   if(error){
-    $('techniciansList').textContent='تعذر تحميل الفنيين: '+error.message;
-    return;
-  }
-  if(!data?.length){
-    $('techniciansList').textContent='لا يوجد فنيون مسجلون.';
+    $("techniciansList").textContent="تعذر تحميل الفنيين: "+error.message;
     return;
   }
 
-  $('techniciansList').replaceChildren();
+  if(!data||!data.length){
+    $("techniciansList").textContent="لا يوجد فنيون مسجلون.";
+    return;
+  }
+
+  $("techniciansList").replaceChildren();
 
   data.forEach(tech=>{
-    const box=document.createElement('div');
-    box.className='ticket';
+    const box=document.createElement("div");
+    box.className="ticket";
 
-    const title=document.createElement('h3');
-    title.textContent=tech.full_name||'فني بدون اسم';
+    const title=document.createElement("h3");
+    title.textContent=tech.full_name||"فني";
 
-    const phone=document.createElement('p');
-    phone.textContent='الموبايل: '+(tech.phone||'غير مسجل');
+    const info=document.createElement("p");
+    info.textContent="الموبايل: "+(tech.phone||"غير مسجل");
 
-    const specialty=document.createElement('p');
-    specialty.textContent='التخصصات: '+(tech.specialization||'غير محددة');
+    const spec=document.createElement("p");
+    spec.textContent="التخصص: "+(tech.specialization||"غير محدد");
 
-    const status=document.createElement('p');
-    status.className='status';
-    status.textContent='الحالة: '+(tech.approval_status||'غير محددة');
+    const status=document.createElement("p");
+    status.className="status";
+    status.textContent="الحالة: "+(tech.approval_status||"غير محددة");
 
-    const actions=document.createElement('div');
-    actions.className='actions';
+    const actions=document.createElement("div");
+    actions.className="actions";
 
-    if(tech.approval_status!=='approved'){
-      const btn=document.createElement('button');
-      btn.className='approve';
-      btn.textContent='اعتماد وتفعيل';
-      btn.onclick=()=>updateTechnician(tech.id,'approved',true);
-      actions.append(btn);
+    if(tech.approval_status!=="approved"){
+      const approve=document.createElement("button");
+      approve.className="approve";
+      approve.textContent="اعتماد وتفعيل";
+      approve.onclick=()=>updateTechnician(tech.id,"approved",true);
+      actions.append(approve);
     }else{
-      const btn=document.createElement('button');
-      btn.className='stop';
-      btn.textContent=tech.is_active?'إيقاف الفني':'إعادة تفعيله';
-      btn.onclick=()=>updateTechnician(tech.id,'approved',!tech.is_active);
-      actions.append(btn);
+      const toggle=document.createElement("button");
+      toggle.className="stop";
+      toggle.textContent=tech.is_active?"إيقاف الفني":"إعادة تفعيله";
+      toggle.onclick=()=>updateTechnician(tech.id,"approved",!tech.is_active);
+      actions.append(toggle);
     }
 
-    if(tech.approval_status!=='rejected'){
-      const btn=document.createElement('button');
-      btn.className='reject';
-      btn.textContent='رفض الطلب';
-      btn.onclick=()=>{
-        if(confirm('هل أنت متأكد من رفض طلب هذا الفني؟')){
-          updateTechnician(tech.id,'rejected',false);
+    if(tech.approval_status!=="rejected"){
+      const reject=document.createElement("button");
+      reject.className="reject";
+      reject.textContent="رفض الطلب";
+      reject.onclick=()=>{
+        if(confirm("هل أنت متأكد من رفض الطلب؟")){
+          updateTechnician(tech.id,"rejected",false);
         }
       };
-      actions.append(btn);
+      actions.append(reject);
     }
 
-    box.append(title,phone,specialty,status,actions);
-    $('techniciansList').append(box);
+    box.append(title,info,spec,status,actions);
+    $("techniciansList").append(box);
   });
 }
 
 async function updateTechnician(id,status,active){
-  $('techMsg').textContent='جاري تحديث بيانات الفني...';
-  const {error}=await supabase.from('technicians')
+  message("techMsg","جاري تحديث بيانات الفني...","notice");
+
+  const {error}=await supabase.from("technicians")
     .update({approval_status:status,is_active:active})
-    .eq('id',id);
+    .eq("id",id);
 
   if(error){
-    $('techMsg').textContent='تعذر تحديث الفني: '+error.message;
+    message("techMsg","تعذر التحديث: "+error.message,"error");
     return;
   }
-  $('techMsg').textContent='تم تحديث حالة الفني.';
+
+  message("techMsg","تم تحديث حالة الفني.","success");
   await loadTechnicians();
 }
 
-$('refreshTechBtn').onclick=loadTechnicians;
+$("refreshTechBtn").onclick=loadTechnicians;
 
-$('saveBtn').onclick=async()=>{
+$("saveBtn").onclick=async()=>{
   if(!currentUser)return;
 
-  const branch=$('branch').value.trim();
-  const description=$('description').value.trim();
+  const branch=$("branch").value.trim();
+  const description=$("description").value.trim();
 
   if(!branch||!description){
-    $('saveMsg').textContent='اكتب اسم الفرع ووصف العطل.';
+    message("saveMsg","اكتب اسم الفرع ووصف العطل.","error");
     return;
   }
 
-  $('saveBtn').disabled=true;
-  $('saveMsg').textContent='جاري حفظ البلاغ...';
+  $("saveBtn").disabled=true;
+  message("saveMsg","جاري حفظ البلاغ...","notice");
 
-  const {error}=await supabase.from('maintenance_requests').insert({
-    branch_name:branch,
-    problem_type:$('type').value,
-    priority:$('priority').value,
-    description,
-    reported_by:currentUser.id,
-    status:'جديد'
-  });
-
-  $('saveBtn').disabled=false;
-
-  if(error){
-    $('saveMsg').textContent='تعذر الحفظ: '+error.message;
-    return;
-  }
-
-  $('saveMsg').textContent='تم حفظ البلاغ بنجاح.';
-  $('branch').value='';
-  $('description').value='';
-  await loadRequests();
-};
-
-async function loadRequests(){
-  $('requests').textContent='جاري تحميل البلاغات...';
-  const {data,error}=await supabase.from('maintenance_requests')
-    .select('id,branch_name,problem_type,priority,description,status,created_at')
-    .order('created_at',{ascending:false});
-
-  if(error){
-    $('requests').textContent='تعذر تحميل البلاغات: '+error.message;
-    return;
-  }
-  if(!data?.length){
-    $('requests').textContent='لا توجد بلاغات حتى الآن.';
-    return;
-  }
-
-  $('requests').replaceChildren();
-  data.forEach(item=>{
-    const box=document.createElement('div');
-    box.cl
+  try{
+    const {error}=await supabase.from("maintenance_requests").insert({
+      branch_name:branch,
+      problem_type:$("type").value,
+      priority:$("priority").value,
+    

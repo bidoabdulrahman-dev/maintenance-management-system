@@ -1,0 +1,85 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>نظام إدارة الصيانة</title>
+<style>
+body{font-family:Arial;background:#f1f3f5;margin:0;color:#263238}
+header{background:#263238;color:white;padding:22px}
+main{max-width:800px;margin:20px auto;padding:15px}
+.card{background:white;padding:20px;margin:15px 0;border-radius:12px}
+input,select,textarea{width:100%;padding:12px;margin:8px 0;box-sizing:border-box;border:1px solid #ddd;border-radius:7px}
+button{background:#37474f;color:white;padding:12px 20px;border:0;border-radius:7px;margin:5px}
+.hidden{display:none}
+</style>
+</head>
+<body>
+<header>
+<h2>نظام إدارة الصيانة</h2>
+<p>Maintenance Management System</p>
+</header>
+<main>
+<div class="card" id="login">
+<h3>تسجيل الدخول</h3>
+<input id="email" placeholder="البريد الإلكتروني">
+<input id="password" type="password" placeholder="كلمة المرور">
+<button onclick="login()">دخول</button>
+</div>
+<div id="app" class="hidden">
+<div class="card">
+<h3>لوحة تحكم الإدارة</h3>
+<button onclick="logout()">خروج</button>
+</div>
+<div class="card">
+<h3>إنشاء بلاغ جديد</h3>
+<input id="branch" placeholder="اسم الفرع">
+<select id="type">
+<option>كهرباء</option>
+<option>سباكة</option>
+<option>تكييف</option>
+<option>أعمال مدنية</option>
+<option>أخرى</option>
+</select>
+<select id="priority">
+<option>عادية</option>
+<option>متوسطة</option>
+<option>عاجلة</option>
+</select>
+<textarea id="description" placeholder="وصف العطل"></textarea>
+<button onclick="addRequest()">حفظ البلاغ</button>
+</div>
+<div class="card">
+<h3>البلاغات المسجلة</h3>
+<div id="requests">لا توجد بلاغات</div>
+</div>
+</div>
+</main>
+<script>
+let data=[];
+function login(){
+if(!email.value||!password.value){alert('اكتب بيانات الدخول');return}
+document.getElementById('login').classList.add('hidden');
+document.getElementById('app').classList.remove('hidden');
+}
+function logout(){
+document.getElementById('app').classList.add('hidden');
+document.getElementById('login').classList.remove('hidden');
+}
+function addRequest(){
+if(!branch.value||!description.value){alert('أكمل البيانات');return}
+data.push({branch:branch.value,type:type.value,priority:priority.value,description:description.value});
+document.getElementById('requests').innerHTML=data.map((x,i)=>`
+<div class="card">
+<strong>${x.branch}</strong>
+<p>${x.type} - ${x.priority}</p>
+<p>${x.description}</p>
+</div>`).join('');
+branch.value='';
+description.value='';
+}
+</script>
+</body>
+  </html>
+  
